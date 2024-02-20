@@ -19,30 +19,16 @@ LOGGER = get_logger(__name__)
 
 import numpy as np
 import pandas as pd
-import yfinance as yf
-import warnings
 
-warnings.filterwarnings("ignore")
-pd.options.display.float_format = '{:.4%}'.format
+url = 'https://raw.githubusercontent.com/phatquantcorner/quantcorner_lseg_hackathon/main/dataset.csv'
+df = pd.read_csv(url, index_col=0)
+df = df.pivot(index = 'Date', columns = 'Symbol', values = 'Adj Close')
+df = (np.log(df) - np.log(df.shift(1))).dropna()
 
-# Date range
-start = '2016-01-01'
-end = '2019-12-30'
+import riskfolio as rp
 
-# Tickers of assets
-assets = ['JCI', 'TGT', 'CMCSA', 'CPB', 'MO', 'APA', 'MMC', 'JPM',
-          'ZION', 'PSA', 'BAX', 'BMY', 'LUV', 'PCAR', 'TXT', 'TMO',
-          'DE', 'MSFT', 'HPQ', 'SEE', 'VZ', 'CNP', 'NI', 'T', 'BA']
-assets.sort()
-
-# Downloading data
-data = yf.download(assets, start = start, end = end)
-data = data.loc[:,('Adj Close', slice(None))]
-data.columns = assets
-
-
-
-
+# Building the portfolio object
+port = rp.Portfolio(returns=df)
 
 def run():
     st.set_page_config(
@@ -50,7 +36,7 @@ def run():
         page_icon="🖥",
     )
 
-    st.write(data)
+    st.write(df)
 
 
 
